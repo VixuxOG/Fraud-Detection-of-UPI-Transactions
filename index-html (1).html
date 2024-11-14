@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Fraud Detection System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-blue-600 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-shield-alt text-white text-2xl mr-2"></i>
+                    <span class="text-white text-xl font-semibold">UPI Fraud Detection</span>
+                </div>
+                <div>
+                    <a href="/dashboard" class="text-white hover:text-blue-200">Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-4">
+                    Welcome to UPI Fraud Detection System
+                </h1>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Upload your transaction data file to analyze and detect potential fraudulent activities using our advanced CNN-based detection system.
+                </p>
+            </div>
+
+            <div class="max-w-xl mx-auto">
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center" id="dropzone">
+                    <form id="uploadForm" class="space-y-4">
+                        <div class="space-y-4">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-blue-500"></i>
+                            <div class="text-gray-600">
+                                <label for="fileInput" class="cursor-pointer text-blue-500 hover:text-blue-600">
+                                    Choose a file
+                                </label>
+                                or drag and drop
+                            </div>
+                            <input type="file" id="fileInput" name="file" accept=".csv" class="hidden">
+                            <p class="text-sm text-gray-500">Supported format: CSV</p>
+                        </div>
+                        <div id="fileInfo" class="hidden">
+                            <p class="text-sm text-gray-600">Selected file: <span id="fileName"></span></p>
+                        </div>
+                        <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                            Upload and Analyze
+                        </button>
+                    </form>
+                </div>
+
+                <div id="uploadStatus" class="mt-4 text-center hidden">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="text-gray-600 mt-2">Processing your file...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const uploadStatus = document.getElementById('uploadStatus');
+
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+                fileInfo.classList.remove('hidden');
+            }
+        });
+
+        // Handle drag and drop
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('border-blue-500');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('border-blue-500');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('border-blue-500');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                fileInput.files = e.dataTransfer.files;
+                fileName.textContent = file.name;
+                fileInfo.classList.remove('hidden');
+            }
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            
+            if (!fileInput.files.length) {
+                alert('Please select a file first.');
+                return;
+            }
+
+            uploadStatus.classList.remove('hidden');
+            form.classList.add('hidden');
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    window.location.href = '/dashboard';
+                } else {
+                    alert(result.error || 'An error occurred during upload');
+                    uploadStatus.classList.add('hidden');
+                    form.classList.remove('hidden');
+                }
+            } catch (error) {
+                alert('An error occurred during upload');
+                uploadStatus.classList.add('hidden');
+                form.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
