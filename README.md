@@ -1,2 +1,2 @@
 # Fraud-Detection-in-UPI-Transactions
-Computer Engineering BE Final Year Project on Convolutional Neural Network (CNN)
+Computer Engineering BE Final Year Project on Fraud-Detection-in-UPI-Transactions Convolutional Neural Network (CNN)
